@@ -1,14 +1,47 @@
 # ==========================================
-# AI Cost Controller - Production Dependencies
+# AI Cost Controller - Enterprise Production Dependencies
 # ==========================================
-# Core LLM Provider
-groq>=0.11.0,<1.0.0
 
-# HTTP Client
+# --------------------------
+# Core LLM Providers
+# --------------------------
+groq>=0.11.0,<1.0.0
 requests>=2.31.0,<3.0.0
 
-# Database ORM
+# --------------------------
+# Database & Persistence
+# --------------------------
 sqlalchemy>=2.0.0,<3.0.0
 
+# --------------------------
+# Distributed Infrastructure
+# --------------------------
+redis>=5.0.0,<6.0.0
+confluent-kafka>=2.3.0,<3.0.0
+
+# --------------------------
+# Billing (Metered Usage)
+# --------------------------
+stripe>=8.0.0,<9.0.0
+
+# --------------------------
+# Token Estimation
+# --------------------------
+tiktoken>=0.5.0,<1.0.0
+
+# --------------------------
+# Validation & Models
+# --------------------------
+pydantic>=2.0.0,<3.0.0
+
+# --------------------------
+# Observability & Tracing
+# --------------------------
+opentelemetry-api>=1.22.0,<2.0.0
+opentelemetry-sdk>=1.22.0,<2.0.0
+
+# --------------------------
 # Packaging & Build Tools
+# --------------------------
 build>=1.0.0,<2.0.0
+wheel>=0.40.0,<1.0.0
