@@ -45,6 +45,7 @@ EOF
 cat << 'EOF' > requirements.txt
 django>=4.2
 playwright>=1.40.0
+requests>=2.31.0
 build
 wheel
 EOF
