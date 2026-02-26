@@ -578,6 +578,14 @@ STATIC_URL = 'static/'
 MIGRATION_MODULES = { 'ai_cost_controller': 'ai_cost_migrations' }
 EOF
 
+cat << 'EOF' > praxiaone/wsgi.py
+import os
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'praxiaone.settings')
+application = get_wsgi_application()
+EOF
+
 cat << 'EOF' > praxiaone/urls.py
 from django.contrib import admin
 from django.urls import path
