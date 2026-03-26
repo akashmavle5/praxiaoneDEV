@@ -45,6 +45,7 @@ EOF
 cat << 'EOF' > requirements.txt
 django>=4.2
 playwright>=1.40.0
+requests>=2.31.0
 build
 wheel
 EOF
@@ -575,6 +576,14 @@ USE_I18N = True
 USE_TZ = True
 STATIC_URL = 'static/'
 MIGRATION_MODULES = { 'ai_cost_controller': 'ai_cost_migrations' }
+EOF
+
+cat << 'EOF' > praxiaone/wsgi.py
+import os
+from django.core.wsgi import get_wsgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'praxiaone.settings')
+application = get_wsgi_application()
 EOF
 
 cat << 'EOF' > praxiaone/urls.py
