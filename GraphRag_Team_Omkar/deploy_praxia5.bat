@@ -28,7 +28,11 @@ python -m venv venv
 call venv\Scripts\activate
 
 echo [4] Installing PJKG Dependencies...
-pip install neo4j sentence-transformers openai pydantic fastapi uvicorn python-dotenv
+pip install fastapi uvicorn pydantic neo4j sentence-transformers python-multipart pandas langchain-community langchain-text-splitters langchain-huggingface langchain-ollama pgmpy pdfplumber pdf2image pytesseract python-docx faiss-cpu pypdf google-generativeai python-dotenv
+echo.
+echo [!] IMPORTANT: Make sure you have created your .env file with GEMINI_API_KEY!
+echo [!] Make sure Ollama is running deepseek-r1:8b and Med42 before testing.
+echo.
 
 echo [5] Starting Praxia5Chronic FastAPI Server...
 start uvicorn main:app --reload --port 8000
