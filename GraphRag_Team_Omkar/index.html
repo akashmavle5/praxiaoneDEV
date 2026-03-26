@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Praxia5Chronic Dashboard</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --border-color: #30363d;
+            --success-color: #3fb950;
+            --card-radius: 8px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            align-items: flex-start;
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel h2 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        button {
+            background-color: #238636;
+            color: white;
+            border: 1px solid rgba(240, 246, 252, 0.1);
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--success-color);
+        }
+
+        button:disabled {
+            background-color: #2ea04380;
+            cursor: not-allowed;
+        }
+
+        .log-box {
+            background-color: #010409;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            font-family: monospace;
+            height: 150px;
+            overflow-y: auto;
+            margin-top: 10px;
+            color: #8b949e;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .chat-messages {
+            background-color: #010409;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            min-height: 400px;
+            max-height: 600px; /* Let it grow but add a cap */
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 6px;
+            max-width: 80%;
+            flex-shrink: 0;
+        }
+
+        .message.user {
+            background-color: #1f2428;
+            align-self: flex-end;
+            border: 1px solid var(--border-color);
+        }
+
+        .message.bot {
+            background-color: #161b22;
+            align-self: flex-start;
+            border: 1px solid var(--accent-color);
+        }
+
+        .markdown-body table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .markdown-body th, .markdown-body td {
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            text-align: left;
+        }
+        
+        .markdown-body th {
+            background-color: #21262d;
+            font-weight: 600;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            align-items: center; /* keep everything middle aligned */
+        }
+
+        .attachment-btn {
+            background-color: #21262d;
+            color: #c9d1d9;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            margin-top: 0; /* Override generic button margin */
+            height: 42px; /* Set fixed height to match input */
+        }
+
+        .attachment-btn:hover {
+            background-color: #30363d;
+            border-color: #8b949e;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background-color: #010409;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            height: 20px; /* Align with new button heights */
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .active-file-pill {
+            display: none;
+            align-items: center;
+            background-color: #1f6feb;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-bottom: 5px;
+            width: fit-content;
+        }
+
+        .remove-file-btn {
+            margin-left: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #c9d1d9;
+        }
+
+        .remove-file-btn:hover {
+            color: white;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            max-width: 1200px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            background-color: #161b22;
+            color: #8b949e;
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 0 1 auto;
+            margin: 0;
+        }
+
+        .tab-btn.active {
+            color: #ffffff;
+            border-bottom: 2px solid var(--accent-color);
+            background-color: #0d1117;
+        }
+
+        .tab-btn:hover {
+            background-color: #21262d;
+            color: #ffffff;
+        }
+
+        .toggle-btn {
+            background-color: #1f6feb;
+            color: white;
+            border: 1px solid rgba(240, 246, 252, 0.1);
+        }
+
+        .toggle-btn:hover {
+            background-color: #388bfd;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Parallel UI styles */
+        .parallel-container {
+            width: 100%;
+            max-width: 95% !important;
+        }
+        
+        .parallel-responses {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            width: 100%;
+        }
+
+        .model-card {
+            background-color: #0d1117;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .model-card h4 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .model-card .markdown-body {
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Praxia5Chronic PJKG Dashboard 🚀</h1>
+
+    <div class="tabs-container">
+        <button class="tab-btn" id="btn-ingest" onclick="switchTab('ingest-panel')">Data Ingestion</button>
+        <button class="tab-btn active" id="btn-chat" onclick="switchTab('chat-panel')">GraphRAG Query Interface</button>
+        <button class="tab-btn toggle-btn" onclick="toggleBN()">Toggle Bayesian Network</button>
+    </div>
+
+    <div class="container">
+        <div class="panel hidden" id="ingest-panel">
+            <h2>Data Ingestion</h2>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                <input type="file" id="datasetFile" accept=".csv,.pdf,.docx,.xlsx,.txt,.png,.jpg,.jpeg"
+                    style="background-color: #010409; color: var(--text-color); border: 1px solid var(--border-color); padding: 5px; border-radius: 4px; width: 230px;">
+                <button id="uploadBtn" onclick="uploadData()" style="margin-top: 0;">Upload & Ingest</button>
+                <p id="status"></p>
+            </div>
+
+            <div class="log-box" id="ingestLogs">
+                System ready.
+            </div>
+
+            <h2 style="margin-top: 30px;">Graph Status</h2>
+            <div id="graphStatus">Checking connection...</div>
+        </div>
+
+        <div class="panel" id="chat-panel">
+            <h2>GraphRAG Query Interface</h2>
+
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message bot">
+                        Hello! I am the AI + GraphRAG assistant. Ask me anything about the patients or chronic
+                        conditions in the graph.
+                    </div>
+                    <div id="answer-box" style="
+                        color: #58a6ff;
+                        padding: 10px;
+                        white-space: pre-wrap;
+                        line-height: 1.6;
+                        font-family: monospace;
+                    "></div>
+                </div>
+                <div class="active-file-pill" id="activeFilePill">
+                    📎 <span id="activeFileName">file.pdf</span> 
+                    <span class="remove-file-btn" onclick="clearActiveFile()">✕</span>
+                </div>
+                <div class="input-group">
+                    <input type="file" id="chatPdfUpload" accept=".csv,.pdf,.docx,.xlsx,.txt,.png,.jpg,.jpeg" style="display: none;" onchange="uploadChatDocument()">
+                    <label for="chatPdfUpload" class="attachment-btn" title="Upload Document">📎</label>
+                    <input type="text" id="queryInput" name="query"
+                        placeholder="Ask about diabetes patients, upload documents, search database..."
+                        onkeypress="handleKeyPress(event)">
+                    <button onclick="sendQuery();" style="margin-top:0; height: 42px;">Ask GraphRAG</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" id="bn-panel">
+            <h2>Dynamic Bayesian Network</h2>
+            <p>Predictive probabilities learned from patient data.</p>
+            <div id="bnNetwork"
+                style="height: 400px; border: 1px solid var(--border-color); border-radius: 6px; background-color: #010409;">
+            </div>
+            <button onclick="refreshBNGraph()">Refresh BN Probabilities</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Added JavaScript Logic ---
+        let currentActiveFile = null;
+
+        // Upload Document from Chat Bar
+        async function uploadChatDocument() {
+            const fileInput = document.getElementById("chatPdfUpload");
+            const pill = document.getElementById("activeFilePill");
+            const nameSpan = document.getElementById("activeFileName");
+            
+            if (fileInput.files.length === 0) return;
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append("file", file);
+
+            // Temporarily show uploading state
+            pill.style.display = "flex";
+            pill.style.backgroundColor = "#8b949e";
+            nameSpan.textContent = "Uploading...";
+
+            try {
+                // Changed to call upload-medical-file specifically to trigger dictionary caching
+                const response = await fetch("/upload-medical-file", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentActiveFile = data.file; // The server returns the key exactly as stored in cache
+                    pill.style.backgroundColor = "#1f6feb";
+                    nameSpan.textContent = currentActiveFile;
+                } else {
+                    currentActiveFile = null;
+                    pill.style.display = "none";
+                    alert("Upload failed.");
+                }
+            } catch (e) {
+                console.error("Upload Error", e);
+                currentActiveFile = null;
+                pill.style.display = "none";
+                alert("Upload error.");
+            }
+            
+            // clear out the input so same file can be selected again if needed
+            fileInput.value = "";
+        }
+
+        function clearActiveFile() {
+            currentActiveFile = null;
+            document.getElementById("activeFilePill").style.display = "none";
+        }
+
+
+        // --- Existing Dashboard Functions ---
+
+        function switchTab(panelId) {
+            document.getElementById('ingest-panel').classList.add('hidden');
+            document.getElementById('chat-panel').classList.add('hidden');
+            document.getElementById('btn-ingest').classList.remove('active');
+            document.getElementById('btn-chat').classList.remove('active');
+
+            document.getElementById(panelId).classList.remove('hidden');
+            if (panelId === 'ingest-panel') {
+                document.getElementById('btn-ingest').classList.add('active');
+            } else {
+                document.getElementById('btn-chat').classList.add('active');
+            }
+        }
+
+        function toggleBN() {
+            const bnPanel = document.getElementById('bn-panel');
+            bnPanel.classList.toggle('hidden');
+        }
+
+        async function checkHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                document.getElementById('graphStatus').innerHTML = `<span style="color: var(--success-color)">Connected to: ${data.database}</span>`;
+            } catch (err) {
+                document.getElementById('graphStatus').innerHTML = `<span style="color: #f85149">Error connecting to backend API.</span>`;
+            }
+        }
+
+        async function uploadData() {
+            const btn = document.getElementById('uploadBtn');
+            const logs = document.getElementById('ingestLogs');
+            const fileIn = document.getElementById('datasetFile');
+
+            if (!fileIn.files.length) return;
+            const file = fileIn.files[0];
+
+            btn.disabled = true;
+            btn.innerText = "Uploading...";
+            logs.innerHTML += `<br>> Uploading ${file.name}...`;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/upload-dataset', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                logs.innerHTML += `<br>> Success: ${data.message || 'Done'}`;
+            } catch (err) {
+                logs.innerHTML += `<br> <span style="color: #f85149">> Error: ${err.message}</span>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Upload & Ingest";
+                logs.scrollTop = logs.scrollHeight;
+            }
+        }
+
+        async function sendQuery() {
+
+            const input = document.getElementById('queryInput');
+            const query = input.value.trim();
+
+            if (!query) return;
+
+            input.value = ""; // Clear input on enter
+
+            const chatMessages = document.getElementById('chatMessages');
+
+            chatMessages.insertAdjacentHTML('beforeend', `<div class="message user">${query}</div>`);
+
+            const typingId = 'typing-' + Date.now();
+
+            chatMessages.insertAdjacentHTML('beforeend', `<div class="message bot" id="${typingId}">
+        <i>Thinking...</i>
+    </div>`);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                // Send query + active file
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        question: query, 
+                        model_choice: 'ollama', // hardcode to ollama as requested to remove dropdown
+                        active_file: currentActiveFile
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.is_parallel) {
+                    let dsHtml = typeof marked !== 'undefined' ? marked.parse(data.deepseek) : data.deepseek;
+                    let gemHtml = typeof marked !== 'undefined' ? marked.parse(data.gemini) : data.gemini;
+                    let med42Html = typeof marked !== 'undefined' ? marked.parse(data.med42) : data.med42;
+
+                    let parallelHtml = `
+                        <div class="parallel-responses">
+                            <div class="model-card">
+                                <h4>🌟 Google Gemini 2.5</h4>
+                                <div class="markdown-body">${gemHtml}</div>
+                            </div>
+                            <div class="model-card">
+                                <h4>🧠 DeepSeek-R1 (Local)</h4>
+                                <div class="markdown-body">${dsHtml}</div>
+                            </div>
+                            <div class="model-card">
+                                <h4>🩺 Med42 (Healthcare Base)</h4>
+                                <div class="markdown-body">${med42Html}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    document.getElementById(typingId).outerHTML = `
+                        <div class="message bot parallel-container">
+                            ${parallelHtml}
+                        </div>
+                    `;
+                } else {
+                    let htmlAnswer = data.answer;
+                    if (typeof marked !== 'undefined') {
+                        htmlAnswer = marked.parse(data.answer);
+                    } else {
+                        htmlAnswer = `<pre style="white-space:pre-wrap;line-height:1.6;font-family:inherit;">${data.answer}</pre>`;
+                    }
+
+                    document.getElementById(typingId).outerHTML = `
+                <div class="message bot markdown-body" style="font-family:inherit; overflow-x:auto;">
+                    ${htmlAnswer}
+                </div>
+            `;
+                }
+
+            } catch (err) {
+
+                document.getElementById(typingId).innerText =
+                    "Error: " + err.message;
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendQuery();
+
+            }
+        }
+
+        async function refreshBNGraph() {
+            try {
+                const response = await fetch('/api/bn-graph');
+                const data = await response.json();
+                const container = document.getElementById('bnNetwork');
+                const nodes = new vis.DataSet(data.nodes.map(n => ({
+                    id: n.id,
+                    label: n.label,
+                    shape: 'box',
+                    color: { background: '#1f6feb', border: '#58a6ff' },
+                    font: { color: '#ffffff' }
+                })));
+                const edges = new vis.DataSet(data.edges);
+                new vis.Network(container, { nodes, edges }, { physics: false });
+            } catch (err) {
+                console.error("BN Graph Load Error", err);
+            }
+        }
+
+        // (Removed previous static uploadPDF logic)
+
+        window.onload = () => {
+            checkHealth();
+            refreshBNGraph();
+        };
+    </script>
+</body>
+
+</html>

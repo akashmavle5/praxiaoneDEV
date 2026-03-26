@@ -1,0 +1,65 @@
+# Praxia5Chronic Setup Instructions
+
+Follow these step-by-step instructions to get the application running on your local machine.
+
+## Step 1: Install Prerequisites
+
+1.  **Python 3.9+**: Ensure Python is installed and added to your system PATH.
+2.  **Ollama**: Install [Ollama](https://ollama.com/) for running local AI models. 
+3.  **Tesseract OCR**: Check your system configuration to make sure Tesseract is installed for PDF image scanning functionality.
+
+## Step 2: Virtual Environment & Packages
+
+1. Open your terminal in the project directory (`e:\updated_internship_gemini` or wherever you cloned the repo).
+2. Create your virtual environment:
+   ```bash
+   python -m venv venv
+   ```
+3. Activate it:
+   - On Windows: `.\venv\Scripts\activate`
+   - On Mac/Linux: `source venv/bin/activate`
+4. Install all Python dependencies:
+   ```bash
+   pip install fastapi uvicorn pydantic neo4j sentence-transformers python-multipart pandas langchain-community langchain-text-splitters langchain-huggingface langchain-ollama pgmpy pdfplumber pdf2image pytesseract python-docx faiss-cpu pypdf google-generativeai python-dotenv
+   ```
+
+## Step 3: Setup Local LLMs (Ollama)
+
+You need to pull the specific models the app uses to process queries in parallel.
+Run these commands in your terminal:
+```bash
+ollama run deepseek-r1:8b
+ollama run hf.co/RichardErkhov/m42-health_-_Llama3-Med42-8B-gguf:Q4_K_M
+```
+*(Downloading these models might take some time depending on your internet connection).*
+
+## Step 4: Add the Gemini API Key
+
+This app leverages Google Gemini 2.5 alongside the local models. 
+1. Create a new file named `.env` in the root directory.
+2. Inside `.env`, add the following line (replace with your actual API key):
+   ```env
+   GEMINI_API_KEY="your_api_key_here"
+   ```
+
+## Step 5: Database Configuration
+
+1. Make sure you have a working Neo4j Aura instance or a Local Neo4j Desktop database.
+2. Open `config.py` in the root directory.
+3. Replace the placeholder credentials with your Neo4j database info:
+   ```python
+   NEO4J_URI = "neo4j+s://<YOUR_DB_ID>.databases.neo4j.io" # or local bolt URI
+   NEO4J_USER = "xyz"
+   NEO4J_PASSWORD = "xyz"
+   ```
+
+## Step 6: Start the Server
+
+1. Make sure your virtual environment is still active.
+2. Run the application using Uvicorn:
+   ```bash
+   uvicorn main:app --reload --host 0.0.0.0 --port 8000
+   ```
+3. Open your browser and go to http://localhost:8000. 
+
+You're done! You can now start uploading medical documents and testing the parallel AI graph insights.

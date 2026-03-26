@@ -1,0 +1,24 @@
+# Environments
+.env
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Application Data
+neo4j_data/
+uploads/
+vector_store/
+
+# Optional: Ignore medical dataset files so you don't accidentally push HIPAA/private data
+*.pdf
+*.csv
+*.xlsx
+*.docx
+
+# OS generated files
+.DS_Store
+Thumbs.db
