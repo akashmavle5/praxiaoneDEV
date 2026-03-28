@@ -1,0 +1,13 @@
+# Run script
+
+chmod +x build_llm_gateway.sh
+./build_llm_gateway.sh
+
+# Test
+
+python3
+
+from ai_llm_gateway import LLMGateway
+llm = LLMGateway()
+print(llm.generate("Explain blood report"))
+print(llm.health())
