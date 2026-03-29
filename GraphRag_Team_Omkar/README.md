@@ -26,6 +26,8 @@ This project integrates various medical data sources (CSV, PDF, Docx, Text) into
 
 ## 🛠 Project Setup & Installation
 
+**🐳 Docker Deployment Available**: If you are deploying this application to a server, we highly recommend using the new Docker-Compose setup. Please read the [README-Docker.md](./README-Docker.md) for full instructions.
+
 ### 1. Prerequisites
 - Python 3.9+
 - A [Neo4j Aura](https://console.neo4j.io/) database instance (or local Neo4j desktop)

@@ -28,7 +28,7 @@ python -m venv venv
 call venv\Scripts\activate
 
 echo [4] Installing PJKG Dependencies...
-pip install fastapi uvicorn pydantic neo4j sentence-transformers python-multipart pandas langchain-community langchain-text-splitters langchain-huggingface langchain-ollama pgmpy pdfplumber pdf2image pytesseract python-docx faiss-cpu pypdf google-generativeai python-dotenv
+pip install -r requirements.txt
 echo.
 echo [!] IMPORTANT: Make sure you have created your .env file with GEMINI_API_KEY!
 echo [!] Make sure Ollama is running deepseek-r1:8b and Med42 before testing.

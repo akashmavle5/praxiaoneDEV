@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Tell the API to connect to the 'ollama' docker service rather than localhost
+      - OLLAMA_BASE_URL=http://ollama:11434
+    env_file:
+      - .env
+    volumes:
+      # Persist user uploads and the FAISS vector database
+      - ./uploads:/app/uploads
+      - ./vector_store:/app/vector_store
+    depends_on:
+      - ollama
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      # Persist downloaded LLM models
+      - ollama_data:/root/.ollama
+
+    # =========================================================================
+    # OPTIONAL: NVIDIA GPU SUPPORT
+    # If the deployment server has an NVIDIA GPU and nvidia-container-toolkit 
+    # installed, uncomment the lines below to enable GPU acceleration for Ollama.
+    # =========================================================================
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  ollama_data:

@@ -23,21 +23,17 @@ from diagnosis_engine import diagnose
 from retriever import db
 from pdf_ingestion import search_pdf
 from langchain_community.llms import Ollama
-llm = Ollama(model="hf.co/RichardErkhov/m42-health_-_Llama3-Med42-8B-gguf:Q4_K_M")
+import os
+
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+llm = Ollama(model="hf.co/RichardErkhov/m42-health_-_Llama3-Med42-8B-gguf:Q4_K_M", base_url=OLLAMA_BASE_URL)
 
 import asyncio
 from dotenv import load_dotenv
-import google.generativeai as genai
 
 load_dotenv()
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-try:
-    gemini_model = genai.GenerativeModel("gemini-2.5-flash")
-except Exception as e:
-    print(f"Gemini initialization error: {e}")
-    gemini_model = None
 
-deepseek_llm = Ollama(model="deepseek-r1:8b")
+deepseek_llm = Ollama(model="deepseek-r1:8b", base_url=OLLAMA_BASE_URL)
 
 async def ask_deepseek_async(question, context, is_general=False):
     if is_general:
@@ -55,23 +51,6 @@ Instructions: Answer concisely based ONLY on the context. Format using professio
     except Exception as e:
         return f"DeepSeek Error: {str(e)}"
 
-async def ask_gemini_async(question, context, is_general=False):
-    if not gemini_model:
-        return "Gemini API is not configured properly."
-    if is_general:
-        prompt = f"""You are a highly knowledgeable medical and wellness AI assistant.
-The user is asking a general health or educational inquiry: "{question}"
-CRITICAL INSTRUCTIONS: Answer directly and comprehensively. Use clear markdown formatting."""
-    else:
-        prompt = f"""Use the following document text to answer the question:
-Context: {context}
-Question: {question}
-Instructions: Answer concisely based ONLY on the context. Format using professional Markdown tables if requested."""
-    try:
-        response = await gemini_model.generate_content_async(prompt)
-        return response.text
-    except Exception as e:
-        return f"Gemini Error: {str(e)}"
 
 async def ask_med42_async(question, context, is_general=False):
     if is_general:
@@ -337,7 +316,9 @@ def query_graph_rag(data: QueryData):
     try:
         from openai import OpenAI
         import json
-        llm_client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
+        
+        ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        llm_client = OpenAI(base_url=f"{ollama_url}/v1", api_key="ollama")
         # ADDED: detect glucose scale dynamically
         glucose_scale = detect_glucose_scale(pjkg_service.graph)
         # 1. Classify Intent
@@ -632,16 +613,14 @@ async def chat_endpoint(request: ChatRequest):
             }
         else:
             deepseek_task = ask_deepseek_async(question, context, is_general=False)
-            gemini_task = ask_gemini_async(question, context, is_general=False)
             med42_task = ask_med42_async(question, context, is_general=False)
 
-            ds_res, gem_res, med42_res = await asyncio.gather(deepseek_task, gemini_task, med42_task, return_exceptions=True)
+            ds_res, med42_res = await asyncio.gather(deepseek_task, med42_task, return_exceptions=True)
 
             return {
                 "answer": "Parallel response complete.",
                 "is_parallel": True,
                 "deepseek": str(ds_res),
-                "gemini": str(gem_res),
                 "med42": str(med42_res)
             }
 
@@ -659,15 +638,13 @@ async def chat_endpoint(request: ChatRequest):
 
     else:
         deepseek_task = ask_deepseek_async(question, "", is_general=True)
-        gemini_task = ask_gemini_async(question, "", is_general=True)
         med42_task = ask_med42_async(question, "", is_general=True)
 
-        ds_res, gem_res, med42_res = await asyncio.gather(deepseek_task, gemini_task, med42_task, return_exceptions=True)
+        ds_res, med42_res = await asyncio.gather(deepseek_task, med42_task, return_exceptions=True)
 
         return {
             "answer": "Parallel response complete.",
             "is_parallel": True,
             "deepseek": str(ds_res),
-            "gemini": str(gem_res),
             "med42": str(med42_res)
         }

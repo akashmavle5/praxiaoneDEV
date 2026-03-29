@@ -336,8 +336,7 @@
             <div class="chat-container">
                 <div class="chat-messages" id="chatMessages">
                     <div class="message bot">
-                        Hello! I am the AI + GraphRAG assistant. Ask me anything about the patients or chronic
-                        conditions in the graph.
+                        Hello! I am the AI + GraphRAG assistant. Ask me anything about the patients or chronic conditions in the graph.
                     </div>
                     <div id="answer-box" style="
                         color: #58a6ff;
@@ -362,7 +361,7 @@
             </div>
         </div>
 
-        <div class="panel" id="bn-panel">
+        <div class="panel hidden" id="bn-panel">
             <h2>Dynamic Bayesian Network</h2>
             <p>Predictive probabilities learned from patient data.</p>
             <div id="bnNetwork"
@@ -527,15 +526,10 @@
 
                 if (data.is_parallel) {
                     let dsHtml = typeof marked !== 'undefined' ? marked.parse(data.deepseek) : data.deepseek;
-                    let gemHtml = typeof marked !== 'undefined' ? marked.parse(data.gemini) : data.gemini;
                     let med42Html = typeof marked !== 'undefined' ? marked.parse(data.med42) : data.med42;
 
                     let parallelHtml = `
                         <div class="parallel-responses">
-                            <div class="model-card">
-                                <h4>🌟 Google Gemini 2.5</h4>
-                                <div class="markdown-body">${gemHtml}</div>
-                            </div>
                             <div class="model-card">
                                 <h4>🧠 DeepSeek-R1 (Local)</h4>
                                 <div class="markdown-body">${dsHtml}</div>
