@@ -4,6 +4,9 @@ from langchain_community.llms import Ollama
 from graph_rag import get_graph_context
 from pdf_ingestion import search_pdf
 import os   
+
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+
 class GraphRetriever:
     """Module responsible for Neo4j database retrieval operations."""
     
@@ -54,6 +57,7 @@ else:
 
 llm = Ollama(
     model="hf.co/RichardErkhov/m42-health_-_Llama3-Med42-8B-gguf:Q4_K_M",
+    base_url=OLLAMA_BASE_URL,
     num_gpu=0
 )
 

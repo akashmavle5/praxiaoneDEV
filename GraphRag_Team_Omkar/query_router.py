@@ -1,7 +1,8 @@
 from langchain_community.llms import Ollama
 import os
 
-llm = Ollama(model="hf.co/RichardErkhov/m42-health_-_Llama3-Med42-8B-gguf:Q4_K_M")
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+llm = Ollama(model="hf.co/RichardErkhov/m42-health_-_Llama3-Med42-8B-gguf:Q4_K_M", base_url=OLLAMA_BASE_URL)
 
 UPLOAD_FOLDER = "uploads"
 

@@ -1,6 +1,10 @@
+import os
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
-import ollama
+from ollama import Client
+
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+ollama_client = Client(host=OLLAMA_BASE_URL)
 
 def diagnose(query):
 
@@ -20,7 +24,7 @@ def diagnose(query):
     Provide possible diagnosis.
     """
 
-    response = ollama.chat(
+    response = ollama_client.chat(
         model="hf.co/RichardErkhov/m42-health_-_Llama3-Med42-8B-gguf:Q4_K_M",
         messages=[{"role": "user", "content": prompt}]
     )

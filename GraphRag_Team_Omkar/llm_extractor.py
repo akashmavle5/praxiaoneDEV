@@ -1,12 +1,15 @@
+import os
 import json
 from openai import OpenAI
+
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 
 # -------------------------------
 # LLM Client (Ollama / Med42)
 # -------------------------------
 
 client = OpenAI(
-    base_url="http://localhost:11434/v1",
+    base_url=f"{OLLAMA_BASE_URL}/v1",
     api_key="ollama"
 )
 
